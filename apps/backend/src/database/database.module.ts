@@ -1,8 +1,11 @@
 import { Global, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { PG_POOL } from './database.constants';
+import { DRIZZLE, PG_POOL } from './database.constants';
 import { DatabaseService } from './database.service';
+import type { DrizzleDb } from './drizzle.types';
+import * as schema from './schema';
 
 @Global()
 @Module({
@@ -28,8 +31,15 @@ import { DatabaseService } from './database.service';
         return pool;
       },
     },
+    {
+      provide: DRIZZLE,
+      inject: [PG_POOL],
+      // Drizzle wraps the pool we already own rather than opening its own, so
+      // there is exactly one connection pool in the process.
+      useFactory: (pool: Pool): DrizzleDb => drizzle({ client: pool, schema }),
+    },
     DatabaseService,
   ],
-  exports: [DatabaseService, PG_POOL],
+  exports: [DatabaseService, DRIZZLE, PG_POOL],
 })
 export class DatabaseModule {}

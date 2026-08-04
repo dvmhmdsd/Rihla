@@ -77,3 +77,5 @@ Each would add work without adding a new architectural lesson.
 - **Webhook idempotency and ordering strategy**
 - **Hybrid inventory:** owned and provider inventory in one search result and one booking flow
 - **Bilingual search:** analyzers, and cross-lingual embedding strategy
+- **Drizzle ORM** for Postgres, with a migration strategy that can handle the inevitable schema churn, compare with using Prisma or TypeORM or plain _pg_ package
+- **Separate dashboard operators, with a shared admin dashboard** 

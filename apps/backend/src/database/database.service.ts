@@ -1,50 +1,51 @@
 import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import type { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
-import { PG_POOL } from './database.constants';
+import { sql } from 'drizzle-orm';
+import type { PgTransactionConfig } from 'drizzle-orm/pg-core';
+import type { Pool, QueryResult, QueryResultRow } from 'pg';
+import { DRIZZLE, PG_POOL } from './database.constants';
+import type { DrizzleDb, DrizzleTx } from './drizzle.types';
 
 /**
- * Thin wrapper over `pg.Pool`. Deliberately not an ORM — transaction
- * boundaries, isolation levels and row locks stay written out in SQL where
- * they can be reasoned about.
+ * Owns database access. Drizzle handles the typed query surface; `raw` stays
+ * available for the SQL Drizzle cannot express, so isolation levels, advisory
+ * locks and `FOR UPDATE` remain first-class rather than fought against.
  */
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
 
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(
+    @Inject(DRIZZLE) readonly db: DrizzleDb,
+    @Inject(PG_POOL) private readonly pool: Pool,
+  ) {}
 
-  /** Parameterized queries only. Never interpolate values into `text`. */
-  query<T extends QueryResultRow = QueryResultRow>(
+  /**
+   * Runs `fn` in a transaction. Pass an isolation level explicitly whenever
+   * the work depends on it — Postgres defaults to READ COMMITTED, which is not
+   * enough to protect a capacity check from a concurrent booking.
+   */
+  transaction<T>(
+    fn: (tx: DrizzleTx) => Promise<T>,
+    config?: PgTransactionConfig,
+  ): Promise<T> {
+    return this.db.transaction(fn, config);
+  }
+
+  /**
+   * Escape hatch to the driver. Parameterized only — never interpolate values
+   * into `text`.
+   */
+  raw<T extends QueryResultRow = QueryResultRow>(
     text: string,
     params?: readonly unknown[],
   ): Promise<QueryResult<T>> {
     return this.pool.query<T>(text, params as unknown[] | undefined);
   }
 
-  /**
-   * Runs `fn` inside a transaction on a single dedicated connection, so
-   * `SELECT ... FOR UPDATE` and friends actually hold across statements.
-   * Commits on return, rolls back on throw.
-   */
-  async transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-      const result = await fn(client);
-      await client.query('COMMIT');
-      return result;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
-  }
-
   /** True when the database answers. Swallows the error by design. */
   async ping(): Promise<boolean> {
     try {
-      await this.pool.query('SELECT 1');
+      await this.db.execute(sql`select 1`);
       return true;
     } catch (error) {
       this.logger.warn(
