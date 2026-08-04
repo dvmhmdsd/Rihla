@@ -1,15 +1,15 @@
-import { formatMoney, money } from "@rihla/shared";
-import { getHealth } from "@/lib/api";
+import { formatMoney, money } from '@rihla/shared';
+import { getHealth } from '@/lib/api';
 
 const dotClass = (up: boolean) =>
-  `inline-block h-2.5 w-2.5 rounded-full ${up ? "bg-emerald-500" : "bg-red-500"}`;
+  `inline-block h-2.5 w-2.5 rounded-full ${up ? 'bg-emerald-500' : 'bg-red-500'}`;
 
 export default async function Home() {
   const result = await getHealth();
 
   // A runtime value from the shared package, not just a type — proves the
   // compiled output is genuinely wired into the frontend bundle.
-  const sample = money(125_000, "EGP");
+  const sample = money(125_000, 'EGP');
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 p-8 font-sans dark:bg-black">
@@ -32,13 +32,13 @@ export default async function Home() {
             <dl className="grid grid-cols-2 gap-y-3 text-sm">
               <dt className="text-zinc-500">Service</dt>
               <dd className="flex items-center gap-2 font-mono text-black dark:text-zinc-100">
-                <span className={dotClass(result.health.status === "ok")} />
+                <span className={dotClass(result.health.status === 'ok')} />
                 {result.health.status}
               </dd>
 
               <dt className="text-zinc-500">Database</dt>
               <dd className="flex items-center gap-2 font-mono text-black dark:text-zinc-100">
-                <span className={dotClass(result.health.db === "up")} />
+                <span className={dotClass(result.health.db === 'up')} />
                 {result.health.db}
               </dd>
 
@@ -72,13 +72,13 @@ export default async function Home() {
           </h2>
           <p className="text-zinc-600 dark:text-zinc-300">
             <code className="font-mono">{sample.amountMinor}</code> minor units
-            renders as{" "}
+            renders as{' '}
             <span className="font-medium text-black dark:text-zinc-100">
-              {formatMoney(sample, "en-EG")}
-            </span>{" "}
-            /{" "}
+              {formatMoney(sample, 'en-EG')}
+            </span>{' '}
+            /{' '}
             <span className="font-medium text-black dark:text-zinc-100">
-              {formatMoney(sample, "ar-EG")}
+              {formatMoney(sample, 'ar-EG')}
             </span>
           </p>
         </section>

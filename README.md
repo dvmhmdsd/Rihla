@@ -4,17 +4,17 @@ A travel marketplace where travelers discover destinations, build multi-stop iti
 
 ## Stack
 
-| Piece | Tech | Location |
-| --- | --- | --- |
-| Frontend | Next.js 16, React 19, Tailwind 4 | [apps/frontend](apps/frontend) |
-| API | NestJS 11, Drizzle over `node-postgres` | [apps/backend](apps/backend) |
-| Database | Postgres 17 via Docker | [docker-compose.yml](docker-compose.yml) |
-| Shared code | Domain types used by both sides | [packages/shared](packages/shared) |
-| Build orchestration | Turborepo, pnpm workspaces | [turbo.json](turbo.json) |
+| Piece               | Tech                                    | Location                                 |
+| ------------------- | --------------------------------------- | ---------------------------------------- |
+| Frontend            | Next.js 16, React 19, Tailwind 4        | [apps/frontend](apps/frontend)           |
+| API                 | NestJS 11, Drizzle over `node-postgres` | [apps/backend](apps/backend)             |
+| Database            | Postgres 17 via Docker                  | [docker-compose.yml](docker-compose.yml) |
+| Shared code         | Domain types used by both sides         | [packages/shared](packages/shared)       |
+| Build orchestration | Turborepo, pnpm workspaces              | [turbo.json](turbo.json)                 |
 
 ## Getting started
 
-Requires Node 22+, pnpm 10, and Docker.
+Requires Docker, plus the Node and pnpm versions the repo pins: `.nvmrc` (Node 22) and the `packageManager` field (pnpm 10.24). With nvm installed, `nvm use` picks up the right Node; CI reads the same two files, so local and CI never disagree.
 
 ```bash
 pnpm install
@@ -29,21 +29,34 @@ Open http://localhost:3000 — the page renders live API and database status. `G
 
 Run from the repo root.
 
-| Command | Does |
-| --- | --- |
-| `pnpm dev` | Runs every app's dev server in parallel |
-| `pnpm build` | Builds `@rihla/shared` first, then both apps |
-| `pnpm typecheck` | `tsc --noEmit` across the workspace |
-| `pnpm lint` | ESLint per app |
-| `pnpm test` | Jest |
-| `pnpm db:up` / `db:down` | Start / stop Postgres |
-| `pnpm db:logs` | Tail Postgres logs |
-| `pnpm db:reset` | Destroy the volume and recreate the database |
-| `pnpm db:psql` | Open a psql shell in the container |
-| `pnpm db:generate` | Diff the schema and write a migration SQL file |
-| `pnpm db:migrate` | Apply pending migrations |
-| `pnpm db:check` | Check migrations for conflicts |
-| `pnpm db:studio` | Open Drizzle Studio |
+| Command                  | Does                                           |
+| ------------------------ | ---------------------------------------------- |
+| `pnpm dev`               | Runs every app's dev server in parallel        |
+| `pnpm build`             | Builds `@rihla/shared` first, then both apps   |
+| `pnpm typecheck`         | `tsc --noEmit` across the workspace            |
+| `pnpm lint`              | ESLint per app (no auto-fix — use `lint:fix`)  |
+| `pnpm test`              | Jest unit tests                                |
+| `pnpm test:e2e`          | Nest e2e tests (no database required)          |
+| `pnpm format`            | Prettier write, whole repo                     |
+| `pnpm format:check`      | Prettier check — the gate CI runs              |
+| `pnpm db:up` / `db:down` | Start / stop Postgres                          |
+| `pnpm db:logs`           | Tail Postgres logs                             |
+| `pnpm db:reset`          | Destroy the volume and recreate the database   |
+| `pnpm db:psql`           | Open a psql shell in the container             |
+| `pnpm db:generate`       | Diff the schema and write a migration SQL file |
+| `pnpm db:migrate`        | Apply pending migrations                       |
+| `pnpm db:check`          | Check migrations for conflicts                 |
+| `pnpm db:studio`         | Open Drizzle Studio                            |
+
+## CI
+
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push and PR to `main`: format check, typecheck, lint, build, unit tests, e2e tests — the same commands listed above, so anything green locally is green in CI. Turbo's cache is persisted through `actions/cache`.
+
+Every gate has been verified to actually fail: a misformatted file, a type error, an `any` leak, and a broken 503 path were each introduced deliberately and each stopped the matching step.
+
+## Formatting
+
+One Prettier config at the root ([.prettierrc.json](.prettierrc.json)) covers both apps and every package — no per-app overrides, so nothing drifts. [.editorconfig](.editorconfig) keeps editors aligned with it. Generated migration SQL is excluded, since it should be reviewed as written.
 
 ## Adding dependencies
 

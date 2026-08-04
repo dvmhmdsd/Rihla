@@ -15,7 +15,11 @@ services:
     volumes:
       - rihla-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-rihla} -d ${POSTGRES_DB:-rihla}']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-rihla} -d ${POSTGRES_DB:-rihla}',
+        ]
       interval: 5s
       timeout: 5s
       retries: 10

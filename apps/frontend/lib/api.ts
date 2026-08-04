@@ -1,7 +1,7 @@
-import { HEALTH_PATH, type HealthResponse } from "@rihla/shared";
-import { connection } from "next/server";
+import { HEALTH_PATH, type HealthResponse } from '@rihla/shared';
+import { connection } from 'next/server';
 
-const API_URL = process.env.API_URL ?? "http://localhost:4000";
+const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 
 export type HealthResult =
   | { reachable: true; health: HealthResponse }

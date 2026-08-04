@@ -58,7 +58,7 @@ _Rihla_ deliberately carries three different consistency problems, which is the 
 
 ## Non-goals (defend these)
 
-- No user-to-user chat 
+- No user-to-user chat
 - No reviews and ratings
 - No mobile app
 - No locales beyond Arabic and English
@@ -78,4 +78,4 @@ Each would add work without adding a new architectural lesson.
 - **Hybrid inventory:** owned and provider inventory in one search result and one booking flow
 - **Bilingual search:** analyzers, and cross-lingual embedding strategy
 - **Drizzle ORM** for Postgres, with a migration strategy that can handle the inevitable schema churn, compare with using Prisma or TypeORM or plain _pg_ package
-- **Separate dashboard operators, with a shared admin dashboard** 
+- **Separate dashboard operators, with a shared admin dashboard**

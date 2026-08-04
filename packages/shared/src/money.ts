@@ -3,7 +3,14 @@
  * never a bare number — see docs/definition.md.
  */
 
-export const CURRENCY_CODES = ['EGP', 'USD', 'EUR', 'GBP', 'SAR', 'AED'] as const;
+export const CURRENCY_CODES = [
+  'EGP',
+  'USD',
+  'EUR',
+  'GBP',
+  'SAR',
+  'AED',
+] as const;
 
 export type CurrencyCode = (typeof CURRENCY_CODES)[number];
 
@@ -18,13 +25,18 @@ const MINOR_UNITS_PER_MAJOR = 100;
 
 export function money(amountMinor: number, currency: CurrencyCode): Money {
   if (!Number.isInteger(amountMinor)) {
-    throw new TypeError(`Money must be integer minor units, received ${amountMinor}`);
+    throw new TypeError(
+      `Money must be integer minor units, received ${amountMinor}`,
+    );
   }
   return { amountMinor, currency };
 }
 
 export function isCurrencyCode(value: unknown): value is CurrencyCode {
-  return typeof value === 'string' && (CURRENCY_CODES as readonly string[]).includes(value);
+  return (
+    typeof value === 'string' &&
+    (CURRENCY_CODES as readonly string[]).includes(value)
+  );
 }
 
 /**
