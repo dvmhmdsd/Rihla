@@ -49,3 +49,5 @@ export function formatMoney(value: Money, locale: string): string {
     currency: value.currency,
   }).format(value.amountMinor / MINOR_UNITS_PER_MAJOR);
 }
+
+export const BROKEN: number = 'this is not a number';
