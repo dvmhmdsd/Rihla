@@ -1,0 +1,7 @@
+{
+  "name": "@rihla/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "ISC",
+  "files": ["base.json", "library.json", "nextjs.json", "nestjs.json"]
+}

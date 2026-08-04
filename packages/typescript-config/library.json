@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Rihla Library",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // Node16 + no "type" field in package.json emits CommonJS, and produces
+    // declarations that a `nodenext` consumer (NestJS) resolves correctly.
+    // Next.js reads the same output fine through its `bundler` resolution.
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "rihla",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Travel marketplace where travelers discover destinations, build multi-stop itineraries, and pay for tours and stays",
+  "license": "ISC",
+  "packageManager": "pnpm@10.24.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "db:psql": "docker compose exec postgres psql -U rihla -d rihla"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.8"
+  }
+}
