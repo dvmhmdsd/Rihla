@@ -1,0 +1,66 @@
+# Pinned to the installed version: schemastore's copy predates `jobs:` and
+# editors report false errors against it.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/v2.1.10/schema.json
+
+# Local mirror of .github/workflows/ci.yml. These hooks exist to fail in
+# seconds what CI would otherwise fail in minutes; CI stays the source of
+# truth, so nothing here may be stricter than the workflow.
+#
+# Bypass when you need to: `git commit --no-verify`, `LEFTHOOK=0 git commit`,
+# or `LEFTHOOK_EXCLUDE=lint-and-typecheck git commit`.
+
+# A clone that never ran `pnpm install` has no hooks. Fail loudly instead of
+# waving unchecked commits through.
+assert_lefthook_installed: true
+
+# Commit-time checks are scoped to the change, not the repo: prettier sees only
+# staged files, and turbo only rebuilds packages the diff touches. That keeps
+# this roughly flat as the monorepo grows.
+pre-commit:
+  # Sequential on purpose. `format` rewrites files that the later jobs read,
+  # and running them concurrently races on those writes.
+  parallel: false
+  jobs:
+    - name: format
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,json,md,yml,yaml,css}'
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      # Fold prettier's rewrites into the commit being made.
+      stage_fixed: true
+
+    # '...[HEAD]' is "packages touched by the staged diff, plus their
+    # dependents" — so editing packages/shared still checks both apps.
+    - name: lint-and-typecheck
+      glob: '*.{ts,tsx}'
+      run: pnpm exec turbo run lint typecheck --filter='...[HEAD]'
+      fail_text: 'Run `pnpm lint` / `pnpm typecheck` for the full output.'
+
+    # Not part of CI. Catches a schema edit that was never turned into a
+    # migration — cheap to spot here, expensive to discover after merge.
+    - name: db-drift
+      glob: 'apps/backend/src/database/**/*.ts'
+      run: pnpm db:check
+      fail_text: 'Schema changed without a migration. Run `pnpm db:generate`.'
+
+# The full CI suite, in ci.yml's order, before anything leaves the machine.
+# Turbo's cache makes the steps already covered at commit time near-free.
+#
+# lefthook takes its diff base from refs/remotes/origin/HEAD. On a clone where
+# that still points at a deleted `master`, every job below fails to resolve its
+# files; `git remote set-head origin main` repairs the ref.
+pre-push:
+  parallel: false
+  jobs:
+    - name: format
+      run: pnpm format:check
+      fail_text: 'Run `pnpm format`.'
+    - name: typecheck
+      run: pnpm typecheck
+    - name: lint
+      run: pnpm lint
+    - name: build
+      run: pnpm build
+    - name: test
+      run: pnpm test
+    # Safe without Postgres: the e2e specs override the pg pool provider.
+    - name: test-e2e
+      run: pnpm test:e2e

@@ -9,6 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "prepare": "lefthook install",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
@@ -29,6 +30,7 @@
     "db:studio": "pnpm --filter backend db:studio"
   },
   "devDependencies": {
+    "lefthook": "^2.1.10",
     "prettier": "^3.9.6",
     "turbo": "^2.10.8"
   }
