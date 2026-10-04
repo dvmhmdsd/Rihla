@@ -10,4 +10,5 @@
  * `pnpm db:generate` to write the migration and `pnpm db:migrate` to apply it.
  */
 
-export {};
+export { destinationsTable } from './destinations';
+export { toursTable } from './tours';
