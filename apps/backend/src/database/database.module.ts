@@ -36,7 +36,8 @@ import * as schema from './schema';
       inject: [PG_POOL],
       // Drizzle wraps the pool we already own rather than opening its own, so
       // there is exactly one connection pool in the process.
-      useFactory: (pool: Pool): DrizzleDb => drizzle({ client: pool, schema }),
+      useFactory: (pool: Pool): DrizzleDb =>
+        drizzle({ client: pool, schema, casing: 'snake_case' }),
     },
     DatabaseService,
   ],
