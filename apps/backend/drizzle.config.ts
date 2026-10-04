@@ -17,4 +17,5 @@ export default defineConfig({
   // schema diff.
   strict: true,
   verbose: true,
+  casing: 'snake_case',
 });
